@@ -128,7 +128,7 @@ func (i InvalidChecksumError) Error() string {
 }
 
 // Validate if the database migrations are applied and consistent
-func Validate(d Driver, migrations []Migration) error {
+func Validate(d Driver, migrations []Migration, withChecksums bool) error {
 	sort.Sort(byMigrationVersion(migrations))
 
 	if version, invalid := isInvalidVersion(migrations); invalid {
@@ -147,6 +147,10 @@ func Validate(d Driver, migrations []Migration) error {
 
 	if version, removed := wasRemovedMigration(applied, migrations); removed {
 		return RemovedMigrationError{Version: version}
+	}
+	
+	if !withChecksums {
+		return nil
 	}
 
 	if version, invalid := isInvalidChecksumMigration(applied, migrations); invalid {
